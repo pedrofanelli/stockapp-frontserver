@@ -11,8 +11,6 @@ public class Main {
 	String getMain(Model model) {
 		
 		
-		
-		
 		return "Main";
 	}
 	
