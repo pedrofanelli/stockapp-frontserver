@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: stockapp-frontserver
+  config:
+    import: configserver:http://configUser:configPassword@localhost:8071
+
+
