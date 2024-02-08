@@ -4,10 +4,345 @@
 	<meta charset="UTF-8">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-	<link rel="stylesheet" type="text/css" th:href="@{/Main.css}">
+	<link rel="stylesheet" type="text/css" href="https://code.highcharts.com/css/stocktools/gui.css">
+    <link rel="stylesheet" type="text/css" href="https://code.highcharts.com/css/annotations/popup.css">
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/indicators/indicators-all.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/drag-panes.js"></script>
+    <script src="https://code.highcharts.com/modules/annotations-advanced.js"></script>
+    <script src="https://code.highcharts.com/modules/price-indicator.js"></script>
+    <script src="https://code.highcharts.com/modules/full-screen.js"></script>
+    <script src="https://code.highcharts.com/modules/stock-tools.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/heikinashi.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/hollowcandlestick.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+	<link rel="stylesheet" type="text/css" th:href="@{/front/Main.css}">
 	<title>Main Page</title>
+	<script th:inline="javascript">
+       
+        let chart;   
+        
+        
+           var val = [[${listadito}]];
+           
+           /*
+           var data = []; 
+           
+           for (i=0;i<val.length;i++) {
+               var obj = val[i];
+               var innerArr = [];
+               innerArr.push(obj.t);
+               innerArr.push(obj.o);
+               innerArr.push(obj.h);
+               innerArr.push(obj.l);
+               innerArr.push(obj.c);
+               innerArr.push(obj.v);
+               data.push(innerArr);
+           }
+          */
+         
+        var data = [ 
+         
+         
+         [# th:each="data : ${listadito}"]
+            [
+                [[${data.t}]],
+                [[${data.o}]],
+                [[${data.h}]],
+                [[${data.l}]],
+                [[${data.c}]],
+                [[${data.v}]]
+            ],
+         [/]
+         
+         ];   
+            // split the data set into ohlc and volume
+            const ohlc = [],
+                volume = [],
+                dataLength = data.length,
+                groupingUnits = [[
+                    'week',                         // unit name
+                    [1]                             // allowed multiples
+                ], [
+                    'month',
+                    [1, 2, 3, 4, 6]
+                ]];
+
+            for (let i = 0; i < dataLength; i += 1) {
+                ohlc.push([
+                    data[i][0], // the date
+                    data[i][1], // open
+                    data[i][2], // high
+                    data[i][3], // low
+                    data[i][4] // close
+                ]);
+
+                volume.push([
+                    data[i][0], // the date
+                    data[i][5] // the volume
+                ]);
+            }
+            
+            
+            const pruebita = [1674536400000, 100, 102, 98, 101, 60800355];
+            
+            //ohlc.unshift([pruebita[0],pruebita[1],pruebita[2],pruebita[3],pruebita[4]]);
+            
+            //volume.unshift([pruebita[0],pruebita[5]]);
+            
+            console.log(ohlc[0]);
+            console.log(volume[0]);
+            
+            console.log(ohlc[ohlc.length-1]);
+            console.log(volume[volume.length-1]);
+            
+            
+            document.addEventListener('DOMContentLoaded', function() {
+
+            	console.log("comeinzo content loaded");
+            	
+            	/*
+            chart = Highcharts.stockChart('container', {
+				            		
+                yAxis: [{
+                    labels: {
+                        align: 'left'
+                    },
+                    height: '80%',
+                    resize: {
+                        enabled: true
+                    }
+                }, {
+                    labels: {
+                        align: 'left'
+                    },
+                    top: '80%',
+                    height: '20%',
+                    offset: 0
+                }],
+                tooltip: {
+                    shape: 'square',
+                    headerShape: 'callout',
+                    borderWidth: 0,
+                    shadow: false,
+                    positioner: function (width, height, point) {
+                        const chart = this.chart;
+                        let position;
+
+                        if (point.isHeader) {
+                            position = {
+                                x: Math.max(
+                                    // Left side limit
+                                    chart.plotLeft,
+                                    Math.min(
+                                        point.plotX + chart.plotLeft - width / 2,
+                                        // Right side limit
+                                        chart.chartWidth - width - chart.marginRight
+                                    )
+                                ),
+                                y: point.plotY
+                            };
+                        } else {
+                            position = {
+                                x: point.series.chart.plotLeft,
+                                y: point.series.yAxis.top - chart.plotTop
+                            };
+                        }
+
+                        return position;
+                    }
+                },
+                series: [{
+                    type: 'ohlc',
+                    id: 'aapl-ohlc',
+                    name: 'AAPL Stock Price',
+                    data: ohlc
+                }, {
+                    type: 'column',
+                    id: 'aapl-volume',
+                    name: 'AAPL Volume',
+                    data: volume,
+                    yAxis: 1
+                }],
+                responsive: {
+                    rules: [{
+                        condition: {
+                            maxWidth: 1000
+                        },
+                        chartOptions: {
+                            rangeSelector: {
+                                inputEnabled: false
+                            }
+                        }
+                    }]
+                },	
+                	
+            });
+            
+            */
+            
+            
+            chart = Highcharts.stockChart('container', {
+
+                    rangeSelector: {
+                        selected: 4
+                    },
+
+                    title: {
+                        text: 'AAPL Historical'
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        tickPixelInterval: 150,
+                        maxZoom: 20 * 1000
+                      },
+
+                    yAxis: [{
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'OHLC'
+                        },
+                        height: '60%',
+                        lineWidth: 2,
+                        resize: {
+                            enabled: true
+                        }
+                    }, {
+                        labels: {
+                            align: 'right',
+                            x: -3
+                        },
+                        title: {
+                            text: 'Volume'
+                        },
+                        top: '65%',
+                        height: '35%',
+                        offset: 0,
+                        lineWidth: 2
+                    }],
+
+                    tooltip: {
+                        split: true
+                    },
+
+                    series: [{
+                        type: 'candlestick',
+                        name: 'AAPL',
+                        data: ohlc,
+                        dataGrouping: {
+                            units: groupingUnits
+                        }
+                    }, {
+                        type: 'column',
+                        name: 'Volume',
+                        data: volume,
+                        yAxis: 1,
+                        dataGrouping: {
+                            units: groupingUnits
+                        }
+                    }]
+                });
+            
+            
+        });
+            
+            
+            let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter');
+
+            eventSource.onmessage = (event) => {
+                // Handle incoming events from the server                
+                
+                let eventData = event.data;
+                let dataArray = JSON.parse(eventData);
+                
+                
+                var seriesOhlc = chart.series[0];
+                var seriesVolu = chart.series[1];
+                
+                shift = seriesOhlc.data.length > 20;
+                shift2 = seriesVolu.data.length > 20;
+                
+                seriesOhlc.addPoint([dataArray.t, dataArray.o, dataArray.h, dataArray.l, dataArray.c], true, shift);
+                seriesVolu.addPoint([dataArray.t, dataArray.v], true, shift2);                               
+        	       
+                    
+                    
+            };
+            eventSource.onopen = (event) => {
+              console.log("EVENT SOURCE ABIERTO!"+event.data);  
+            };
+            
+            eventSource.onerror = (event) => {
+              
+                // Handle errors and attempt to reconnect
+                console.error('Error occurred:', event);
+                eventSource.close();  // Close the current connection
+
+                // Attempt to reconnect after a delay (e.g., 5 seconds)
+                setTimeout(createEventSource(), 5000);
+              
+            };
+            
+            /*
+             * De esta forma tengo un loop infinito, donde estará esperando info del emitter, y si sucede un timeout porque no se recibió info,
+             * se cierra el existente y se crea uno nuevo, hasta que responda seguirá así.
+             * Yo podria actualizar el backend, o cerrarlo, y sin actualizar el frontend, veria cambios. Por ejemplo, si el backend no responde, tiraría
+             * error al toque, y se ejecutaria el evento de error, cada 5 segundos, intentando nuevamente, en un loop infinito.
+             * Si yo levantara nuevamente el backend, entraria en el timeout cada 30 segundos. Copado!
+             */
+            
+            function createEventSource() {
+                
+                console.log("ATTEMPTING TO CONNECT...");
+                
+                let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter');
+
+                let count = 0;
+                eventSource.onmessage = (event) => {
+                    // Handle incoming events from the server
+                	
+                	let eventData = event.data;
+                    let dataArray = JSON.parse(eventData);
+                    
+                    
+                    var seriesOhlc = chart.series[0];
+                    var seriesVolu = chart.series[1];
+                    
+                    shift = seriesOhlc.data.length > 20;
+                    shift2 = seriesVolu.data.length > 20;
+                    
+                    seriesOhlc.addPoint([dataArray.t, dataArray.o, dataArray.h, dataArray.l, dataArray.c], true, shift);
+                    seriesVolu.addPoint([dataArray.t, dataArray.v], true, shift2);
+                    
+                };
+                eventSource.onopen = (event) => {
+                  console.log("EVENT SOURCE ABIERTO!"+event.data);  
+                };
+
+                eventSource.onerror = (event) => {
+                    
+                    // Handle errors and attempt to reconnect
+                    console.error('Error occurred:', event);
+                    eventSource.close();  // Close the current connection
+
+                    // Attempt to reconnect after a delay (e.g., 5 seconds)
+                    setTimeout(createEventSource(), 5000);
+
+                };
+                
+            }
+            // Close the connection when needed
+            //eventSource.close();
+            
+            
+        
+        </script>
 </head>
 <body>
 	<h1>SOY EL TITULO</h1>
+	<div id="container" class="chart" style="width:100%; height:400px;"></div>
 </body>
 </html>
