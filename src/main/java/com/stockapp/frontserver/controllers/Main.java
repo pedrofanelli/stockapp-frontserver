@@ -29,7 +29,7 @@ public class Main {
 	ResponseEntity<List<AggregatesResult>> restExchange = restTemplate.exchange(
                         "http://stockapp-apiconnection/livegraph/{ticker}",
                         HttpMethod.GET,
-                        null, responseType, "AAPL babyyy");
+                        null, responseType, "AAPL");
 		
 	
 	model.addAttribute("listadito", restExchange.getBody());
