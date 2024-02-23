@@ -1,5 +1,9 @@
 /*@charset "UTF-8";*/
 
 * {
-	background-color: #264653;
+	background-color: rgb(115, 136, 167);
+}
+
+#contenedorGrafico {
+	background-color: white;
 }

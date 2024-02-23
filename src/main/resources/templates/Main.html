@@ -88,7 +88,7 @@
             
             document.addEventListener('DOMContentLoaded', function() {
             	
-            	/*
+            	
             chart = Highcharts.stockChart('container', {
 				            		
                 yAxis: [{
@@ -142,12 +142,12 @@
                 series: [{
                     type: 'ohlc',
                     id: 'aapl-ohlc',
-                    name: 'AAPL Stock Price',
+                    name: [[${dataTicker}]] + ' Stock Price',
                     data: ohlc
                 }, {
                     type: 'column',
                     id: 'aapl-volume',
-                    name: 'AAPL Volume',
+                    name: [[${dataTicker}]] + ' Volume',
                     data: volume,
                     yAxis: 1
                 }],
@@ -166,9 +166,9 @@
                 	
             });
             
-            */
             
             
+            /*
             chart = Highcharts.stockChart('container', {
 
                     rangeSelector: {
@@ -176,7 +176,7 @@
                     },
 
                     title: {
-                        text: 'AAPL Historical'
+                        text: 'Data Live de: [[${dataTicker}]]'
                     },
                     xAxis: {
                         type: 'datetime',
@@ -217,7 +217,7 @@
 
                     series: [{
                         type: 'candlestick',
-                        name: 'AAPL',
+                        name: [[${dataTicker}]],
                         data: ohlc,
                         dataGrouping: {
                             units: groupingUnits
@@ -232,12 +232,12 @@
                         }
                     }]
                 });
-            
+            */
             
         });
             
             
-            let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/AAPL');
+            let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/'+[[${dataTicker}]]);
 
             eventSource.onmessage = (event) => {
                 // Handle incoming events from the server                
@@ -285,7 +285,7 @@
                 
                 console.log("ATTEMPTING TO CONNECT...");
                 
-                let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/AAPL');
+                let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/'+[[${dataTicker}]]);
 
                 let count = 0;
                 eventSource.onmessage = (event) => {
@@ -329,7 +329,7 @@
         </script>
 </head>
 <body>
-	<h1>SOY EL TITULO</h1>
+	<h1 th:text="'VIENDO LIVE DATA DE: ' + ${dataTicker} + '!'"></h1>
 	<div>
 		<form>
 		    <label for="ticker">Choose a ticker to see live data:</label>
@@ -342,6 +342,8 @@
 		    <button id="myInput" type="submit" value="Submit" >BOTON!</button>
   		</form>
 	</div>
-	<div id="container" class="chart" style="width:100%; height:400px;"></div>
+	<div id="contenedorGrafico">
+		<div id="container" class="chart" style="width:100%; height:400px;"></div>
+	</div>
 </body>
 </html>
