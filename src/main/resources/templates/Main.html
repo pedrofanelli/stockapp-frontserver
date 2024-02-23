@@ -17,6 +17,7 @@
     <script src="https://code.highcharts.com/stock/modules/hollowcandlestick.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 	<link rel="stylesheet" type="text/css" th:href="@{/front/Main.css}">
+	<script th:src="@{/front/Main.js}"></script>
 	<title>Main Page</title>
 	<script th:inline="javascript">
        
@@ -329,6 +330,18 @@
 </head>
 <body>
 	<h1>SOY EL TITULO</h1>
+	<div>
+		<form>
+		    <label for="ticker">Choose a ticker to see live data:</label>
+		    <select name="ticker" id="ticker">
+		      <option value="AAPL">Apple</option>
+		      <option value="GOOGL">Google</option>
+		      <option value="AMZN">Amazon</option>
+		    </select>
+		    <br>
+		    <button id="myInput" type="submit" value="Submit" >BOTON!</button>
+  		</form>
+	</div>
 	<div id="container" class="chart" style="width:100%; height:400px;"></div>
 </body>
 </html>
