@@ -17,33 +17,14 @@
     <script src="https://code.highcharts.com/stock/modules/hollowcandlestick.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 	<link rel="stylesheet" type="text/css" th:href="@{/front/Main.css}">
-	<script th:src="@{/front/Main.js}"></script>
-	<title>Main Page</title>
+	
+	<title>Main Page</title> 
 	<script th:inline="javascript">
-       
-        let chart;   
         
-        
-           var val = [[${listadito}]];
+        let nameDataTicker = [[${dataTicker}]];
            
-           /*
-           var data = []; 
-           
-           for (i=0;i<val.length;i++) {
-               var obj = val[i];
-               var innerArr = [];
-               innerArr.push(obj.t);
-               innerArr.push(obj.o);
-               innerArr.push(obj.h);
-               innerArr.push(obj.l);
-               innerArr.push(obj.c);
-               innerArr.push(obj.v);
-               data.push(innerArr);
-           }
-          */
          
-        var data = [ 
-         
+        let data = [ 
          
          [# th:each="data : ${listadito}"]
             [
@@ -57,221 +38,7 @@
          [/]
          
          ];   
-            // split the data set into ohlc and volume
-            const ohlc = [],
-                volume = [],
-                dataLength = data.length,
-                groupingUnits = [[
-                    'week',                         // unit name
-                    [1]                             // allowed multiples
-                ], [
-                    'month',
-                    [1, 2, 3, 4, 6]
-                ]];
-
-            for (let i = 0; i < dataLength; i += 1) {
-                ohlc.push([
-                    data[i][0], // the date
-                    data[i][1], // open
-                    data[i][2], // high
-                    data[i][3], // low
-                    data[i][4] // close
-                ]);
-
-                volume.push([
-                    data[i][0], // the date
-                    data[i][5] // the volume
-                ]);
-            }
             
-            
-            
-            document.addEventListener('DOMContentLoaded', function() {
-            	
-            	
-            chart = Highcharts.stockChart('container', {
-				            		
-                yAxis: [{
-                    labels: {
-                        align: 'left'
-                    },
-                    height: '80%',
-                    resize: {
-                        enabled: true
-                    }
-                }, {
-                    labels: {
-                        align: 'left'
-                    },
-                    top: '80%',
-                    height: '20%',
-                    offset: 0
-                }],
-                tooltip: {
-                    shape: 'square',
-                    headerShape: 'callout',
-                    borderWidth: 0,
-                    shadow: false,
-                    positioner: function (width, height, point) {
-                        const chart = this.chart;
-                        let position;
-
-                        if (point.isHeader) {
-                            position = {
-                                x: Math.max(
-                                    // Left side limit
-                                    chart.plotLeft,
-                                    Math.min(
-                                        point.plotX + chart.plotLeft - width / 2,
-                                        // Right side limit
-                                        chart.chartWidth - width - chart.marginRight
-                                    )
-                                ),
-                                y: point.plotY
-                            };
-                        } else {
-                            position = {
-                                x: point.series.chart.plotLeft,
-                                y: point.series.yAxis.top - chart.plotTop
-                            };
-                        }
-
-                        return position;
-                    }
-                },
-                series: [{
-                    type: 'ohlc',
-                    id: 'aapl-ohlc',
-                    name: [[${dataTicker}]] + ' Stock Price',
-                    data: ohlc
-                }, {
-                    type: 'column',
-                    id: 'aapl-volume',
-                    name: [[${dataTicker}]] + ' Volume',
-                    data: volume,
-                    yAxis: 1
-                }],
-                responsive: {
-                    rules: [{
-                        condition: {
-                            maxWidth: 1000
-                        },
-                        chartOptions: {
-                            rangeSelector: {
-                                inputEnabled: false
-                            }
-                        }
-                    }]
-                },	
-                	
-            });
-            
-            
-            
-            /*
-            chart = Highcharts.stockChart('container', {
-
-                    rangeSelector: {
-                        selected: 4
-                    },
-
-                    title: {
-                        text: 'Data Live de: [[${dataTicker}]]'
-                    },
-                    xAxis: {
-                        type: 'datetime',
-                        tickPixelInterval: 150,
-                        maxZoom: 20 * 1000
-                      },
-
-                    yAxis: [{
-                        labels: {
-                            align: 'right',
-                            x: -3
-                        },
-                        title: {
-                            text: 'OHLC'
-                        },
-                        height: '60%',
-                        lineWidth: 2,
-                        resize: {
-                            enabled: true
-                        }
-                    }, {
-                        labels: {
-                            align: 'right',
-                            x: -3
-                        },
-                        title: {
-                            text: 'Volume'
-                        },
-                        top: '65%',
-                        height: '35%',
-                        offset: 0,
-                        lineWidth: 2
-                    }],
-
-                    tooltip: {
-                        split: true
-                    },
-
-                    series: [{
-                        type: 'candlestick',
-                        name: [[${dataTicker}]],
-                        data: ohlc,
-                        dataGrouping: {
-                            units: groupingUnits
-                        }
-                    }, {
-                        type: 'column',
-                        name: 'Volume',
-                        data: volume,
-                        yAxis: 1,
-                        dataGrouping: {
-                            units: groupingUnits
-                        }
-                    }]
-                });
-            */
-            
-        });
-            
-            
-            let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/'+[[${dataTicker}]]);
-
-            eventSource.onmessage = (event) => {
-                // Handle incoming events from the server                
-                
-                let eventData = event.data;
-                let dataArray = JSON.parse(eventData);
-                
-                
-                var seriesOhlc = chart.series[0];
-                var seriesVolu = chart.series[1];
-                
-                shift = seriesOhlc.data.length > 20;
-                shift2 = seriesVolu.data.length > 20;
-                
-                seriesOhlc.addPoint([dataArray.t, dataArray.o, dataArray.h, dataArray.l, dataArray.c], true, shift);
-                seriesVolu.addPoint([dataArray.t, dataArray.v], true, shift2);                               
-        	       
-                    
-                    
-            };
-            eventSource.onopen = (event) => {
-              console.log("EVENT SOURCE ABIERTO!"+event.data);  
-            };
-            
-            eventSource.onerror = (event) => {
-              
-                // Handle errors and attempt to reconnect
-                console.error('Error occurred:', event);
-                eventSource.close();  // Close the current connection
-
-                // Attempt to reconnect after a delay (e.g., 5 seconds)
-                setTimeout(createEventSource(), 5000);
-              
-            };
             
             /*
              * De esta forma tengo un loop infinito, donde estará esperando info del emitter, y si sucede un timeout porque no se recibió info,
@@ -281,52 +48,13 @@
              * Si yo levantara nuevamente el backend, entraria en el timeout cada 30 segundos. Copado!
              */
             
-            function createEventSource() {
-                
-                console.log("ATTEMPTING TO CONNECT...");
-                
-                let eventSource = new EventSource('http://localhost:8072/apiconnection/emitter/'+[[${dataTicker}]]);
-
-                let count = 0;
-                eventSource.onmessage = (event) => {
-                    // Handle incoming events from the server
-                	
-                	let eventData = event.data;
-                    let dataArray = JSON.parse(eventData);
-                    
-                    
-                    var seriesOhlc = chart.series[0];
-                    var seriesVolu = chart.series[1];
-                    
-                    shift = seriesOhlc.data.length > 20;
-                    shift2 = seriesVolu.data.length > 20;
-                    
-                    seriesOhlc.addPoint([dataArray.t, dataArray.o, dataArray.h, dataArray.l, dataArray.c], true, shift);
-                    seriesVolu.addPoint([dataArray.t, dataArray.v], true, shift2);
-                    
-                };
-                eventSource.onopen = (event) => {
-                  console.log("EVENT SOURCE ABIERTO!"+event.data);  
-                };
-
-                eventSource.onerror = (event) => {
-                    
-                    // Handle errors and attempt to reconnect
-                    console.error('Error occurred:', event);
-                    eventSource.close();  // Close the current connection
-
-                    // Attempt to reconnect after a delay (e.g., 5 seconds)
-                    setTimeout(createEventSource(), 5000);
-
-                };
-                
-            }
-            // Close the connection when needed
-            //eventSource.close();
+            
+            
             
             
         
         </script>
+        <script th:src="@{/front/Main.js}"></script>
 </head>
 <body>
 	<h1 th:text="'VIENDO LIVE DATA DE: ' + ${dataTicker} + '!'"></h1>
