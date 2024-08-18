@@ -1,9 +1,27 @@
 /*@charset "UTF-8";*/
 
-* {
+body {
 	background-color: rgb(115, 136, 167);
 }
 
 #contenedorGrafico {
-	background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+	text-align: center;
+	margin: 10px;
+}
+
+#contenedorInput {
+	text-align: center;
+	margin: 25px;
+}
+
+#contenedorGrafico #container {
+	width:90%; 
+	height:400px;
+	border-radius: 20px;
 }

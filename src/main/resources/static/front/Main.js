@@ -207,7 +207,7 @@ function handleSubmit(event) {
 	let selector = document.getElementById("ticker");
 	console.log(selector.value);
 	
-	window.open("http://localhost:8072/front/main/"+selector.value,"_self");
+	window.open("http://localhost:8091/main/"+selector.value,"_self");
 	
 }
 
